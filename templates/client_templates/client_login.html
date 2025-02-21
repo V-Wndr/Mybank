@@ -16,6 +16,8 @@
       box-shadow: 0 0 15px rgba(0,0,0,0.1);
     }
   </style>
+  <script src="/static/js/config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 
 <body>
@@ -29,17 +31,17 @@
         <div class="card login-card">
           <div class="card-body">
             <h2 class="card-title text-center mb-4">Login</h2>
-            <form>
+            <form id="loginForm" onsubmit="handleLogin(event)">
               <div class="mb-3">
-                <label for="username" class="form-label">Username</label>
-                <input type="text" class="form-control" id="username" placeholder="Enter your username">
+                <label class="form-label">Username</label>
+                <input type="text" name="username" class="form-control" placeholder="Enter your username" required>
               </div>
               <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" placeholder="Enter your password">
+                <label class="form-label">Password</label>
+                <input type="password" name="password" class="form-control" placeholder="Enter your password" required>
               </div>
               <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-primary">Login</button>
+                <button type="button" class="btn btn-primary" onclick="handleLogin(event)">Login</button>
               </div>
               <div class="text-center mt-3">
                 <span>No account? </span>
@@ -54,5 +56,45 @@
     </div>
   </div>
 </body>
+<script>
+  const handleLogin = async (event) => {
+    event.preventDefault(); // 阻止表单默认提交行为
+    
+    const formData = new FormData(document.getElementById('loginForm'));
+    const username = formData.get('username');
+    const password = formData.get('password');
+    if (!username || !password){
+      window.alert('Please enter your username and password');
+    }
+    else if (!username.match(/^[0-9]+/)){
+      window.alert('Username must be a number')
+    }
+    console.log('formData: ', formData);
+    const loginData = {
+      username: username,
+      password: password
+    };
+    console.log('loginData: ', loginData);
 
+    try {
+      axios.post('/client/login', {
+        username: username,
+        password: password
+      })
+      .then(response => {
+        console.log('响应:', response);
+        if (response.status === 200) {
+          window.location.href = response.data.redirect_url;
+        }
+        else if (response.status === 401){
+        }
+      })
+      .catch(error => {
+          window.alert('login failure, please check your user id or password');
+      });
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  }
+</script>
 </html>
